@@ -1,26 +1,10 @@
-import { DGResponse } from "@/lib/types";
+import { getDGData } from "@/lib/get-dg-data";
 import {
   getTotalBlocked,
   getTopAgingBlockers,
   getBlockerSourceBreakdown,
 } from "@/lib/aggregate";
 import StatCard from "@/components/StatCard";
-
-// Same fetch pattern as /app/dependencies/page.tsx (Day 5), for consistency —
-// both pages hit the same internal /api/jira endpoint built Day 4.
-async function getIssues(): Promise<DGResponse> {
-  const base = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
-
-  const res = await fetch(`${base}/api/jira`, { cache: "no-store" });
-
-  if (!res.ok) {
-    return { issues: [], source: "sample" };
-  }
-
-  return res.json();
-}
 
 // Distinct bar colors per source, matching BlockerSourceTag's palette
 // from Day 5 for visual consistency across both screens.
@@ -32,7 +16,7 @@ const SOURCE_BAR_COLORS: Record<string, string> = {
 };
 
 export default async function RollupPage() {
-  const { issues, source } = await getIssues();
+  const { issues, source } = await getDGData();
 
   const totalBlocked = getTotalBlocked(issues);
   const agingBlockers = getTopAgingBlockers(issues, 10);
