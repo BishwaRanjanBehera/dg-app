@@ -1,8 +1,137 @@
-export default function RollupPage() {
+import { DGResponse } from "@/lib/types";
+import {
+  getTotalBlocked,
+  getTopAgingBlockers,
+  getBlockerSourceBreakdown,
+} from "@/lib/aggregate";
+import StatCard from "@/components/StatCard";
+
+// Same fetch pattern as /app/dependencies/page.tsx (Day 5), for consistency —
+// both pages hit the same internal /api/jira endpoint built Day 4.
+async function getIssues(): Promise<DGResponse> {
+  const base = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+
+  const res = await fetch(`${base}/api/jira`, { cache: "no-store" });
+
+  if (!res.ok) {
+    return { issues: [], source: "sample" };
+  }
+
+  return res.json();
+}
+
+// Distinct bar colors per source, matching BlockerSourceTag's palette
+// from Day 5 for visual consistency across both screens.
+const SOURCE_BAR_COLORS: Record<string, string> = {
+  Business: "bg-purple-500",
+  Engineering: "bg-orange-500",
+  Vendor: "bg-teal-500",
+  Unspecified: "bg-gray-400",
+};
+
+export default async function RollupPage() {
+  const { issues, source } = await getIssues();
+
+  const totalBlocked = getTotalBlocked(issues);
+  const agingBlockers = getTopAgingBlockers(issues, 10);
+  const sourceBreakdown = getBlockerSourceBreakdown(issues);
+
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-bold">Management Rollup</h1>
-      <p className="text-gray-500">Coming soon (Day 6).</p>
-    </main>
+    <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Management Rollup
+          </h1>
+          <p className="mt-1 text-sm text-gray-600">
+            A leadership-level view of blocked-item risk.
+          </p>
+        </div>
+        {source === "sample" && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-yellow-300 bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800">
+            ⚠ Demo Data Mode
+          </span>
+        )}
+      </div>
+
+      <section className="mb-8 flex justify-center">
+        <StatCard label="Total Blocked" value={totalBlocked} />
+      </section>
+
+      <section className="mb-8">
+        <h2 className="mb-3 text-lg font-semibold text-gray-800">
+          Longest-Running Blockers
+        </h2>
+        {agingBlockers.length > 0 ? (
+          <ol className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
+            {agingBlockers.map((blocker, index) => (
+              <li
+                key={blocker.key}
+                className="flex items-center justify-between gap-3 px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-gray-400">
+                    {index + 1}.
+                  </span>
+                  <span className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs font-medium text-gray-700">
+                    {blocker.key}
+                  </span>
+                  <span className="text-sm text-gray-900">
+                    {blocker.title}
+                  </span>
+                </div>
+                <span className="whitespace-nowrap text-sm font-medium text-red-700">
+                  {blocker.daysBlocked >= 0
+                    ? `${blocker.daysBlocked} day${
+                        blocker.daysBlocked === 1 ? "" : "s"
+                      } blocked`
+                    : "Age unknown"}
+                </span>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+            No blocked items right now — nothing to rank.
+          </p>
+        )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-lg font-semibold text-gray-800">
+          Blockers by Source
+        </h2>
+        {sourceBreakdown.length > 0 ? (
+          <div className="space-y-3 rounded-lg border border-gray-200 bg-white p-4">
+            {sourceBreakdown.map((entry) => (
+              <div key={entry.source}>
+                <div className="mb-1 flex items-center justify-between text-sm">
+                  <span className="font-medium text-gray-800">
+                    {entry.source}
+                  </span>
+                  <span className="text-gray-600">
+                    {entry.count} ({entry.percentage}%)
+                  </span>
+                </div>
+                <div className="h-3 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className={`h-full rounded-full ${
+                      SOURCE_BAR_COLORS[entry.source] ?? "bg-gray-400"
+                    }`}
+                    style={{ width: `${entry.percentage}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+            No blocked items right now — no breakdown to show.
+          </p>
+        )}
+      </section>
+    </div>
   );
 }
