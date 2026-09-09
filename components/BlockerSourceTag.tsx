@@ -4,10 +4,10 @@ import { BlockerSource } from "@/lib/types";
 // (edge case from transform.ts) gets its own neutral style rather than
 // being lumped in with a real source.
 const SOURCE_STYLES: Record<string, string> = {
-  Business: "bg-purple-100 text-purple-800 border-purple-300",
-  Engineering: "bg-orange-100 text-orange-800 border-orange-300",
-  Vendor: "bg-teal-100 text-teal-800 border-teal-300",
-  Unspecified: "bg-gray-100 text-gray-600 border-gray-300",
+  Business: "bg-purple-50 text-purple-700 border-purple-200",
+  Engineering: "bg-orange-50 text-orange-700 border-orange-200",
+  Vendor: "bg-teal-50 text-teal-700 border-teal-200",
+  Unspecified: "bg-gray-50 text-gray-600 border-gray-200",
 };
 
 interface BlockerSourceTagProps {
@@ -22,9 +22,10 @@ export default function BlockerSourceTag({ source }: BlockerSourceTagProps) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-xs font-medium ${style}`}
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded border px-2 py-0.5 text-xs font-medium ${style}`}
+      aria-label={`Blocker source: ${source}`}
     >
-      🏷 {source}
+      <span aria-hidden="true">🏷</span> {source}
     </span>
   );
 }
