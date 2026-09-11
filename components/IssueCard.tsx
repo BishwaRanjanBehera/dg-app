@@ -21,7 +21,7 @@ export default function IssueCard({ issue }: IssueCardProps) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="font-mono text-xs text-gray-500">{key}</p>
-          <h3 className="mt-0.5 truncate font-semibold text-gray-900">
+          <h3 className="mt-0.5 truncate font-semibold text-gray-900" title={title}>
             {title}
           </h3>
         </div>

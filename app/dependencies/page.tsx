@@ -1,6 +1,9 @@
 import { getDGData } from "@/lib/get-dg-data";
 import IssueCard from "@/components/IssueCard";
 
+// See app/api/jira/route.ts for why this is explicit rather than implicit.
+export const dynamic = "force-dynamic";
+
 export default async function DependenciesPage() {
   const { issues, source } = await getDGData();
 

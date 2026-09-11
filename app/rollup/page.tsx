@@ -6,6 +6,9 @@ import {
 } from "@/lib/aggregate";
 import StatCard from "@/components/StatCard";
 
+// See app/api/jira/route.ts for why this is explicit rather than implicit.
+export const dynamic = "force-dynamic";
+
 // Distinct bar colors per source, matching BlockerSourceTag's palette
 // from Day 5 for visual consistency across both screens.
 const SOURCE_BAR_COLORS: Record<string, string> = {
@@ -62,7 +65,7 @@ export default async function RollupPage() {
                   <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 font-mono text-xs font-medium text-gray-700">
                     {blocker.key}
                   </span>
-                  <span className="truncate text-sm text-gray-900">
+                  <span className="truncate text-sm text-gray-900" title={blocker.title}>
                     {blocker.title}
                   </span>
                 </div>
