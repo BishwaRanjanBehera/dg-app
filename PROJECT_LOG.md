@@ -1,54 +1,53 @@
 # DG (Dependency Guard) — PROJECT LOG
 
 ## Day 1 — Requirements & Pitch
-- Delivered: PRD.docx, Implementation Blueprint (Days 2–10).docx, Pitch Deck.pptx
-- Defined problem, scope (in/out), target users, and the 10-day plan.
+- Delivered: PRD.docx, Implementation Blueprint (Days 2–10).docx, Pitch Deck.pptx.
 
 ## Day 2 — Design & Architecture (no code)
-**Decisions finalized:** Next.js (App Router, TS) + Tailwind, no database, no auth, one API endpoint (`GET /api/jira`), grouped-list/card UI, Vercel hosting.
-**Deliverables:** `ARCHITECTURE.md`, `SCHEMA.md`, `API.md`, `UI-WIREFRAMES.md`, `PROJECT-STRUCTURE.md`.
-**Blueprint status:** No changes needed.
+- Finalized: Next.js (App Router, TS) + Tailwind, no database, no auth, one API endpoint, grouped-list/card UI, Vercel hosting.
+- Deliverables: `ARCHITECTURE.md`, `SCHEMA.md`, `API.md`, `UI-WIREFRAMES.md`, `PROJECT-STRUCTURE.md`.
 
 ## Day 3 — Environment Setup
-**Completed:** Node/npm/Git verified, `dg-app` scaffolded, GitHub repo connected, Jira Cloud sandbox created (project `SCRUM`, 12 issues, 4 blocked-by links, blocker-source labels), `.env.local` configured, `NavBar.tsx` + placeholder pages built.
-**Blueprint status:** No changes. See `DAY3-SUMMARY.md`.
+- `dg-app` scaffolded, GitHub repo connected, Jira Cloud sandbox created and populated, `.env.local` configured, `NavBar.tsx` + placeholder pages built.
 
-## Day 4 — Core Implementation Part 1: Jira Integration Layer
-**Completed:** `lib/types.ts`, `lib/jira-client.ts`, `lib/transform.ts`, `lib/sample-data.ts`, `app/api/jira/route.ts` with live/sample fallback.
-**Blueprint status:** No changes. `DGIssue[]`/`DGResponse` shape locked for all future days.
+## Day 4 — Jira Integration Layer
+- `lib/types.ts`, `lib/jira-client.ts`, `lib/transform.ts`, `lib/sample-data.ts`, `app/api/jira/route.ts` with live/sample fallback.
 
-## Day 5 — Core Implementation Part 2: Dependency Map View
-**Completed:** `StatusBadge`, `BlockerSourceTag`, `IssueCard` components; full `app/dependencies/page.tsx` replacing the Day 3 placeholder. Verified against live Jira sandbox data.
-**Blueprint status:** No changes. See `DAY5-SUMMARY.md`.
+## Day 5 — Dependency Map View
+- `StatusBadge`, `BlockerSourceTag`, `IssueCard`; full `app/dependencies/page.tsx`.
 
-## Day 6 — Core Implementation Part 3: Management Rollup Dashboard + MVP Deployment
-**Completed:** `lib/aggregate.ts`, `StatCard`, full `app/rollup/page.tsx`; required attribution footer added; full MVP deployed live on Vercel (`https://dg-app-pink.vercel.app`).
-**Issue found & fixed:** Production-only crash from a Server Component self-fetch pattern — replaced with `lib/get-dg-data.ts`, called directly by both pages and by the API route.
-**Blueprint status:** Feature scope matched Day 6 exactly; deployment intentionally pulled forward from its later Blueprint day at the user's explicit request. See `DAY6-SUMMARY.md`.
+## Day 6 — Management Rollup Dashboard + MVP Deployment
+- `lib/aggregate.ts`, `StatCard`, full `app/rollup/page.tsx`; attribution footer; deployed live to `https://dg-app-pink.vercel.app`.
+- Fixed a production-only crash (Server Component self-fetch pattern) via `lib/get-dg-data.ts`.
 
 ## Day 7 — Testing, Edge Cases & Visual Polish
-**Objective:** Harden DG for a real demo — test edge cases, fix visual rough edges, ensure the sample-data fallback is bulletproof — then do a full UX/accessibility polish pass. No new features.
+- All Blueprint edge cases tested and passing (empty state, multi-blocker, unmapped source, sample-data fallback, slow network).
+- Added `loading.tsx` for both pages, `error.tsx`/`global-error.tsx`, `TESTING.md`.
+- Full UX/accessibility polish pass: active nav state, sticky nav, consistent spacing/typography, hover micro-interactions, ARIA labels.
 
-**Edge-case testing (all passed):**
-- Empty state (zero blocked items): confirmed graceful "No blocked items right now" messaging on both pages, no broken layout.
-- Multiple blockers per item: confirmed via SCRUM-12 (blocked by 2 issues), renders as separate chips.
-- Unmapped blocker-source label: confirmed falls back to gray "Unspecified" tag rather than crashing.
-- Full sample-data fallback run-through: confirmed both pages render correctly and identically in structure when `JIRA_API_TOKEN` is invalidated, with the "Demo Data Mode" badge showing correctly.
-- Slow-network loading state: confirmed via DevTools throttling.
+## Day 8 — Production Hardening & Release-Readiness Review
+- Comprehensive QA/Security/Performance review. Fixed: no fetch timeout on Jira calls (added 8s `AbortController` timeout), implicit dynamic rendering (made explicit via `export const dynamic = "force-dynamic"`), missing skip-to-content link, generic default 404 page (replaced with branded `not-found.tsx`), no tooltip on truncated titles, and a documentation inaccuracy in `SCHEMA.md` (corrected to match actual, better behavior).
+- Verified: no XSS exposure, no leaked secrets, no CORS concerns, accessibility and responsive design all sound.
+- Full end-to-end walkthrough passed on both localhost and production.
 
-**Stabilization work:**
-- `app/dependencies/loading.tsx`, `app/rollup/loading.tsx` — skeleton loading states for both pages
-- `app/error.tsx`, `app/global-error.tsx` — friendly error boundaries instead of raw crash screens
-- `TESTING.md` — full test notes and documented v1.0 limitations
+## Day 9 — Final Refinement & Demo Preparation
+**Objective:** Fresh-eyes review of the live product, small low-risk fixes only, professional release polish, and a rehearsed demo script — no new features, protecting the stability of the deployed app this close to Day 10.
 
-**Visual/UX polish pass (Senior Product Designer + Engineer review):**
-- `components/NavBar.tsx` — rebuilt as a client component with active-link highlighting (`aria-current`), sticky positioning with backdrop blur, focus-visible rings
-- `app/layout.tsx` — fixed leftover default metadata (title/description), added page background for card contrast
-- `components/Footer.tsx`, `components/StatusBadge.tsx`, `components/BlockerSourceTag.tsx`, `components/IssueCard.tsx`, `components/StatCard.tsx` — refined spacing/typography rhythm, added accessibility labels, subtle hover/transition micro-interactions
-- `app/dependencies/page.tsx`, `app/rollup/page.tsx` — consistent responsive padding and heading scale across both pages, improved empty-state visuals with icons
+**Fresh-eyes review:** Completed on the live URL in an incognito window. No issues found — nothing confusing, rough, or in need of a copy/spacing fix.
 
-**Verified live** at `https://dg-app-pink.vercel.app` after deployment: active nav highlighting, sticky nav, card hover effects, and both pages rendering real Jira data correctly with no errors.
+**Professional release polish (all additive, no app-logic changes):**
+- `README.md` — replaced the default `create-next-app` boilerplate with a full project README: problem statement, screens, tech stack, reliability/fallback behavior, local setup instructions, documentation index, scope, and license.
+- `LICENSE` — added MIT license.
+- `app/icon.svg` — added a custom "DG" monogram favicon via Next.js's automatic icon convention, replacing the default Next.js icon.
+- `app/layout.tsx` — added SEO and social-sharing metadata (Open Graph + Twitter card fields, `metadataBase` pointing at the live URL).
+- GitHub repo — added the live URL to the repo's "Website" field and relevant topics (`nextjs`, `typescript`, `jira-api`, `tailwindcss`, `vercel`, `claude-ai`) for discoverability.
 
-**Blueprint status:** No changes — today's work was entirely testing, hardening, and polish, exactly as scoped for Day 7. No new features, no redesign.
+**Demo preparation (required Blueprint deliverable):**
+- `DEMO_SCRIPT.md` — written: a 4–5 minute walkthrough (problem statement → Dependency Map → Management Rollup → what's next roadmap) plus prepared answers to anticipated questions (Jira downtime handling, multi-team scalability, build timeline, no-auth rationale, hardest bug encountered).
+- Demo rehearsed twice on the live URL (not localhost), both runs under 5 minutes.
 
-**Day 8 readiness:** App is feature-complete, tested, and polished, running correctly both locally and in production. Per the Blueprint, Day 8 is normally "Deployment" — already done as part of Day 6/7 in this project's actual pacing. Next real work: whatever Days 9–10 of the Blueprint specify (demo script rehearsal, retrospective, final readiness check) — to be confirmed from the Blueprint before starting.
+**Verified live** at `https://dg-app-pink.vercel.app`: favicon updated, social-sharing metadata present (confirmed via page source `og:title`), both pages still rendering correctly, production matches local exactly.
+
+**Blueprint status:** No new features, no risky refactors — exactly as scoped for Day 9. All End-of-Day Checklist items complete: fresh-eyes review done, `DEMO_SCRIPT.md` written, demo rehearsed 2x on live URL, all Day 1 deliverables (PRD, Blueprint, Pitch Deck) confirmed accessible for submission.
+
+**Day 10 readiness:** DG v1.0 is fully live, tested, polished, and demo-ready. Per the Blueprint, Day 10 is presentation and reflection only — delivering the rehearsed demo, submitting deliverables, and documenting next steps. No further building planned.
