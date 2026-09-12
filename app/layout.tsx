@@ -14,10 +14,27 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://dg-app-pink.vercel.app";
+const SITE_TITLE = "DG — Dependency Guard";
+const SITE_DESCRIPTION =
+  "A team dependency-visibility dashboard for TPMs — see what's blocked, what's blocking it, and how long it's been stuck. Built with Claude for the AB Talks 60-Day Claude AI Challenge.";
+
 export const metadata: Metadata = {
-  title: "DG — Dependency Guard",
-  description:
-    "A team dependency-visibility dashboard for TPMs — see what's blocked, what's blocking it, and how long it's been stuck.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_TITLE,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

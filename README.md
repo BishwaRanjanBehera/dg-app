@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DG — Dependency Guard
 
-## Getting Started
+A team dependency-visibility dashboard for Technical Program Managers. DG connects to a live Jira Cloud instance, pulls issues and their linked-issue (dependency) data, and turns that scattered information into a clear, at-a-glance view of what's blocked, what's blocking it, and how long it's been stuck.
 
-First, run the development server:
+**Live demo:** https://dg-app-pink.vercel.app
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Built as a 10-day capstone project for the AB Talks 60-Day Claude AI Challenge, using Claude as the primary development partner.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## The Problem
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Dependencies and blockers already exist as data inside Jira (via issue links like "blocks" / "is blocked by"), but Jira doesn't present this data as a dependency map. TPMs spend real time manually clicking through linked tickets to reconstruct the blocker picture for a project, and leadership has no fast way to see how many items are blocked, for how long, or where the blockers are coming from.
 
-## Learn More
+DG surfaces this automatically, in two focused screens.
 
-To learn more about Next.js, take a look at the following resources:
+## Screens
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Dependency Map** (`/dependencies`) — every issue in the project, with blocked items grouped first and clearly flagged: what's blocking them, and where the blocker originates (Business / Engineering / Vendor).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Management Rollup** (`/rollup`) — a leadership-level view: total blocked count, the longest-running blockers ranked by age, and a breakdown of blockers by source.
 
-## Deploy on Vercel
+## Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Next.js 16** (App Router, TypeScript) — single deployable app for both UI and backend
+- **Tailwind CSS** — styling
+- **Jira Cloud REST API v3** — live data source, against a personal free sandbox
+- **Vercel** — hosting, free Hobby tier, GitHub-integrated auto-deploy
+- **No database** — DG is stateless; it fetches and normalizes Jira data live on every request
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full technical design, [`SCHEMA.md`](./SCHEMA.md) for the data model, and [`API.md`](./API.md) for the API contract.
+
+## Reliability
+
+If the live Jira connection ever fails or times out — bad credentials, network issues, Jira downtime — DG automatically falls back to a built-in sample dataset that renders identically to live data, with a visible "Demo Data Mode" badge. The app is always demoable, even offline from Jira. See [`TESTING.md`](./TESTING.md) for the full test log.
+
+## Running Locally
+
+**Prerequisites:** Node.js 18+ and npm.
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/BishwaRanjanBehera/dg-app.git
+   cd dg-app
+   ```
+
+2. Install dependencies:
+   ```
+   npm install
+   ```
+
+3. Create a `.env.local` file in the project root with your own Jira Cloud sandbox credentials:
+   ```
+   JIRA_DOMAIN=your-site-name
+   JIRA_EMAIL=you@example.com
+   JIRA_API_TOKEN=your-api-token
+   ```
+   Generate an API token at https://id.atlassian.com/manage-profile/security/api-tokens. `JIRA_DOMAIN` is just the subdomain — e.g. for `your-site-name.atlassian.net`, use `your-site-name`.
+
+   If you don't configure Jira credentials, the app still runs and automatically shows the sample-data fallback.
+
+4. Run the dev server:
+   ```
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000).
+
+## Project Documentation
+
+| Document | Contents |
+|---|---|
+| [`DG_PRD_v1.docx`](./DG_PRD_v1.docx) | Product requirements — problem, scope, goals |
+| [`ARCHITECTURE.md`](./ARCHITECTURE.md) | Tech stack, component diagram, data flow, security |
+| [`SCHEMA.md`](./SCHEMA.md) | The `DGIssue` data model and Jira field mapping |
+| [`API.md`](./API.md) | The `/api/jira` endpoint contract |
+| [`UI-WIREFRAMES.md`](./UI-WIREFRAMES.md) | Screen wireframes and user flow |
+| [`TESTING.md`](./TESTING.md) | Manual test log and known v1.0 limitations |
+| [`DEMO_SCRIPT.md`](./DEMO_SCRIPT.md) | Rehearsed demo walkthrough |
+| [`PROJECT_LOG.md`](./PROJECT_LOG.md) | Day-by-day build log across the 10-day capstone |
+
+## Scope
+
+**In scope (v1.0):** Jira Cloud integration, Dependency Map view, blocker-source tagging, Management Rollup dashboard, sample-data fallback, single shared workspace (no login), public deployment.
+
+**Explicitly out of scope (v1.0):** user authentication, multi-team/multi-project support, notifications, editing Jira data, predictive forecasting, exported reports. See the PRD's Future Roadmap for what's next.
+
+## License
+
+MIT — see [`LICENSE`](./LICENSE).
